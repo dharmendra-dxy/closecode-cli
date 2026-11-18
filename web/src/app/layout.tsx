@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "cn";
 
 const poppins = Poppins({
-  weight: "400",
+  weight: ["400", "500", "600"],
   subsets: ["latin"],
   variable: "--font-poppins",
 });
