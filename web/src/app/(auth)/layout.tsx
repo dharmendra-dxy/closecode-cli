@@ -1,11 +1,28 @@
+"use client";
+
 import Image from "next/image";
 import { Braces, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { MAIN_ROUTE } from "@/lib/ui-route";
+import { DashboardSkeleton } from "@/components/shared/skeleton/dashbaord-skeleton";
 
 export default function AuthLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const { data, isPending } = authClient.useSession();
+  const isAuthenticated = !isPending && (data?.session || data?.user);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated) router.replace(MAIN_ROUTE.dashboard);
+  }, [isAuthenticated, router]);
+
+  if (isPending || isAuthenticated) return <DashboardSkeleton />;
+
   return (
     <div className="grid min-h-svh flex-1 lg:grid-cols-2">
       <div className="flex flex-col px-6 py-8 sm:px-10 lg:px-12">
