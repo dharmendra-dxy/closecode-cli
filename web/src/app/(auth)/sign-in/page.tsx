@@ -17,6 +17,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { AUTH_ROUTE } from "@/lib/ui-route";
 
 export const metadata: Metadata = {
   title: "Sign in | CloseCode",
@@ -97,7 +98,7 @@ export default function SignInPage() {
       <p className="text-center text-sm text-muted-foreground">
         New to CloseCode?{" "}
         <Link
-          href="/sign-up"
+          href={AUTH_ROUTE.signup}
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
           Create an account
