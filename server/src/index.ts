@@ -2,6 +2,10 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 
+import { toNodeHandler } from "better-auth/node";
+import { auth } from './lib/auth';
+
+
 const app = express();
 const PORT = process.env.PORT;
 
@@ -12,6 +16,8 @@ const corsOption = {
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }
+
+app.all("/api/auth/*splat", toNodeHandler(auth))
 
 app.use(cors(corsOption));
 app.use(express.urlencoded({ extended: true }));
