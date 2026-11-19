@@ -1,0 +1,1 @@
+export const BETTER_AUTH_VERIFICATION_URI = "/device";
