@@ -5,6 +5,7 @@ import chalk from "chalk";
 import figlet from "figlet";
 
 import { Command } from "commander";
+import { login } from "./commands/auth.js";
 
 
 dotenv.config();
@@ -26,7 +27,8 @@ async function main() {
 
   program
     .version("0.0.1")
-    .description("CloseCode CLI - A Cli Based AI Tool");
+    .description("CloseCode CLI - A Cli Based AI Tool")
+    .addCommand(login);
 
     
   // Default action shows help
@@ -38,6 +40,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.log(chalk.red("Error running orbital CLI:"), err);
+  console.log(chalk.red("Error running CloseCode CLI:"), err);
   process.exit(1);
 });
