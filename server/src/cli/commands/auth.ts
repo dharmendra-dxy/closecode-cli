@@ -13,8 +13,9 @@ import yoctoSpinner from "yocto-spinner";
 
 import * as z from "zod/v4";
 import dotenv from "dotenv";
-import { prisma } from "../../lib/prisma.js";
-import { CLI_CLIENT_ID, SERVER_BASE_URL } from "../../constant/index.js";
+import { prisma } from "../../lib/prisma";
+import { CLI_CLIENT_ID, SERVER_BASE_URL, TOKEN_FILE } from "@/constant/index";
+import { getStoredToken, isTokenExpired, storeToken } from "@/lib/token";
 
 dotenv.config();
 
@@ -36,6 +37,80 @@ const authClient = createAuthClient({
   plugins: [deviceAuthorizationClient()],
 });
 
+const pollForToken = async (
+  authClient: any,
+  deviceCode: string,
+  clientId: string,
+  initialIntervalue: number,
+) => {
+  let pollingInterval = initialIntervalue;
+
+  const spinner = yoctoSpinner({ text: "", color: "cyan" });
+  let dots = 0;
+
+  return new Promise((resolve, reject) => {
+    const poll = async () => {
+      dots = (dots + 1) % 4;
+      spinner.text = chalk.gray(
+        `Polling for authorization${".".repeat(dots)}${" ".repeat(3 - dots)}`,
+      );
+      if (!spinner.isSpinning) spinner.start();
+
+      try {
+        const { data, error } = await authClient.device.token({
+          grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+          device_code: deviceCode,
+          client_id: clientId,
+          fetchOptions: {
+            headers: {
+              "user-agent": `My CLI`,
+            },
+          },
+        });
+
+        if (data?.access_token) {
+          console.log(
+            chalk.bold.yellow(
+              `Authorization successful!! Your access token: ${data.access_token}`,
+            ),
+          );
+
+          spinner.stop();
+          resolve(data);
+          return;
+        } else if (error) {
+          switch (error.error) {
+            case "authorization_pending":
+              // Continue polling
+              break;
+            case "slow_down":
+              pollingInterval += 5;
+              break;
+            case "access_denied":
+              console.error("Access was denied by the user");
+              return;
+            case "expired_token":
+              console.error("The device code has expired. Please try again.");
+              return;
+            default:
+              spinner.stop();
+              logger.error(`Error: ${error.error_description}`);
+              process.exit(1);
+          }
+        }
+      } catch (error) {
+        spinner.stop();
+        logger.error(`Network error: ${error}`);
+        process.exit(1);
+      }
+
+      setTimeout(poll, pollingInterval * 1000);
+    };
+
+    setTimeout(poll, pollingInterval * 1000);
+  });
+};
+
 /* ------------------------------------
 Actions
 ------------------------------------*/
@@ -53,9 +128,9 @@ export async function loginAction(opts: LoginOptions) {
 
   intro(chalk.bold("🔐Auth Cli Login"));
 
-  // TODO: CHANGE THIS WITH TOKEN MANAGEMENT UTILS
-  const existingToken = false;
-  const expired = false;
+  // Token Management during login:
+  const existingToken = await getStoredToken();
+  const expired = await isTokenExpired();
 
   if (existingToken && !expired) {
     const shouldReAuth = await confirm({
@@ -124,8 +199,36 @@ export async function loginAction(opts: LoginOptions) {
       ),
     );
 
+    const token = await pollForToken(
+      authClient,
+      device_code,
+      clientId,
+      interval,
+    );
 
-  } catch (error) {}
+    if (token) {
+      const saved = await storeToken(token);
+
+      if (!saved) {
+        console.log(
+          chalk.yellow("\n⚠️  Warning: Could not save authentication token."),
+        );
+        console.log(chalk.yellow("You may need to login again on next use."));
+      }
+
+      // TODO: get the user data
+
+      outro(chalk.green("Login successfull!"));
+      console.log(chalk.gray(`\n Token saved to: ${TOKEN_FILE}`));
+      console.log(
+        chalk.gray("You can now use AI commands without logging in again.\n"),
+      );
+    }
+  } catch (error) {
+    spinner.stop();
+    console.error(chalk.red("\nLogin failed:"), error);
+    process.exit(1);
+  }
 }
 
 /* ------------------------------------

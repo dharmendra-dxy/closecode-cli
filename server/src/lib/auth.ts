@@ -1,8 +1,8 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "./prisma.js";
+import { prisma } from "./prisma";
 import { deviceAuthorization } from "better-auth/plugins";
-import { BETTER_AUTH_VERIFICATION_URI } from "../constant/index.js";
+import { BETTER_AUTH_VERIFICATION_URI } from "@/constant/index";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
