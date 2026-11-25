@@ -15,7 +15,13 @@ import * as z from "zod/v4";
 import dotenv from "dotenv";
 import { prisma } from "../../lib/prisma";
 import { CLI_CLIENT_ID, SERVER_BASE_URL, TOKEN_FILE } from "@/constant/index";
-import { getStoredToken, isTokenExpired, storeToken } from "@/lib/token";
+import {
+  clearStoredToken,
+  getStoredToken,
+  isTokenExpired,
+  requireAuth,
+  storeToken,
+} from "@/lib/token";
 
 dotenv.config();
 
@@ -231,6 +237,67 @@ export async function loginAction(opts: LoginOptions) {
   }
 }
 
+export async function logoutAction() {
+  intro(chalk.bold("👋 Logout"));
+
+  const token = await getStoredToken();
+
+  if (!token) {
+    console.log(chalk.yellow("You're not logged in."));
+    process.exit(0);
+  }
+
+  const shouldLogout = await confirm({
+    message: "Are you sure you want to logout?",
+    initialValue: false,
+  });
+
+  if (isCancel(shouldLogout) || !shouldLogout) {
+    cancel("Logout cancelled");
+    process.exit(0);
+  }
+
+  const cleared = await clearStoredToken();
+
+  if (cleared) {
+    outro(chalk.green("✅ Successfully logged out!"));
+  } else {
+    console.log(chalk.yellow("⚠️  Could not clear token file."));
+  }
+}
+
+export async function whoamiAction(opts: LoginOptions) {
+  const token = await requireAuth();
+  if (!token?.access_token) {
+    console.log("No access token found. Please login.");
+    process.exit(1);
+  }
+
+  const user = await prisma.user.findFirst({
+    where: {
+      sessions: {
+        some: {
+          token: token.access_token,
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+    },
+  });
+
+  // Output user session info
+  console.log(
+    chalk.bold.greenBright(`\n
+      👤 User: ${user?.name}
+      📧 Email: ${user?.email}
+      👤 ID: ${user?.id}`),
+  );
+}
+
 /* ------------------------------------
 Commands Setup
 ------------------------------------*/
@@ -240,3 +307,12 @@ export const login = new Command("login")
   .option("--server-url <url>", "The Better Auth server URL", SERVER_BASE_URL)
   .option("--client-id <id>", "The OAuth client ID", CLI_CLIENT_ID)
   .action(loginAction);
+
+export const logout = new Command("logout")
+  .description("Logout and clear stored credentials")
+  .action(logoutAction);
+
+export const whoami = new Command("whoami")
+  .description("Show current authenticated user")
+  .option("--server-url <url>", "The Better Auth server URL", SERVER_BASE_URL)
+  .action(whoamiAction);

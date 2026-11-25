@@ -66,7 +66,7 @@ export async function requireAuth() {
 
   if (!token) {
     console.log(
-      chalk.red("❌ Not authenticated. Please run 'your-cli login' first."),
+      chalk.red("❌ Not authenticated. Please run 'closecode login' first."),
     );
     process.exit(1);
   }

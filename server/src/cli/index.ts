@@ -1,14 +1,11 @@
 #!/usr/bin/env node
 
-import dotenv from "dotenv";
+import "dotenv/config";
 import chalk from "chalk";
 import figlet from "figlet";
 
 import { Command } from "commander";
-import { login } from "@/cli/commands/auth";
-
-
-dotenv.config();
+import { login, logout, whoami } from "@/cli/commands/auth";
 
 async function main() {
   //Display Banner
@@ -28,7 +25,9 @@ async function main() {
   program
     .version("0.0.1")
     .description("CloseCode CLI - A Cli Based AI Tool")
-    .addCommand(login);
+    .addCommand(login)
+    .addCommand(logout)
+    .addCommand(whoami);
 
     
   // Default action shows help
