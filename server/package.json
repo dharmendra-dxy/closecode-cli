@@ -12,8 +12,10 @@
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prisma:emit": "npx prisma contract emit",
-    "prisma:migrate": "npx prisma@prev migrate dev",
-    "prisma:generate": "npx prisma@prev generate"
+    "prisma:prev:migrate": "npx prisma@prev migrate dev",
+    "prisma:prev:generate": "npx prisma@prev generate",
+    "prisma:migrate": "npx prisma migrate dev",
+    "prisma:generate": "npx prisma generate"
   },
   "keywords": [],
   "author": "",
