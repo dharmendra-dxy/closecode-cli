@@ -15,3 +15,22 @@ export const TOKEN_ENDPOINT = "/device/token"
 export const CLI_CLIENT_ID = "close-code-cli";
 export const CONFIG_DIR = path.join(os.homedir(), ".closecode-cli");
 export const TOKEN_FILE = path.join(CONFIG_DIR, "token.json");
+
+
+export const START_OPTIONS: {value:string, label:string, hint:string}[] = [
+      {
+        value: "chat",
+        label: "Chat",
+        hint: "Simple chat with AI",
+      },
+      {
+        value: "tool",
+        label: "Tool Calling",
+        hint: "Chat with tools (Google Search, Code Execution)",
+      },
+      {
+        value: "agent",
+        label: "Agentic Mode",
+        hint: "Advanced AI agent (Coming soon)",
+      },
+    ]

@@ -6,6 +6,7 @@ import figlet from "figlet";
 
 import { Command } from "commander";
 import { login, logout, whoami } from "@/cli/commands/auth";
+import { start } from "@/cli/commands/ai";
 
 async function main() {
   //Display Banner
@@ -27,7 +28,8 @@ async function main() {
     .description("CloseCode CLI - A Cli Based AI Tool")
     .addCommand(login)
     .addCommand(logout)
-    .addCommand(whoami);
+    .addCommand(whoami)
+    .addCommand(start);
 
     
   // Default action shows help
