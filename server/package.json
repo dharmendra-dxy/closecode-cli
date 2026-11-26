@@ -31,11 +31,13 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.128",
     "@clack/prompts": "^1.9.0",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "@prisma/orm-postgres": "^8.0.0-rc.18",
     "@types/express": "^5.0.6",
+    "ai": "^7.0.183",
     "better-auth": "^1.7.25",
     "boxen": "^9.0.0",
     "chalk": "^6.0.1",
