@@ -6,7 +6,7 @@ import figlet from "figlet";
 
 import { Command } from "commander";
 import { login, logout, whoami } from "@/cli/commands/auth";
-import { start } from "@/cli/commands/ai";
+import { start } from "@/cli/commands/ai/ai";
 
 async function main() {
   //Display Banner
